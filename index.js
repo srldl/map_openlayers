@@ -2,54 +2,64 @@
 
 var angular = require('angular');
 
-var map_test2 = angular.module('map_test2',[]);
+var map_openlayers = angular.module('map_openlayers',[]);
 
 
-map_test2.controller('MapCtrl', function($scope) {
+map_openlayers.controller('MapCtrl', function($scope) {
+  var EPSG = 'EPSG:32761'; // EPSG:3031 - WGS 84 / Antarctic Polar Stereographic
 
-  var projection = ol.proj.get('EPSG:3857');
-     var projectionExtent = projection.getExtent();
-     var size = ol.extent.getWidth(projectionExtent) / 256;
-     var resolutions = new Array(14);
-     var matrixIds = new Array(14);
-     for (var z = 0; z < 14; ++z) {
-       // generate resolutions and matrixIds arrays for this WMTS
-       resolutions[z] = size / Math.pow(2, z);
-       matrixIds[z] = z;
-     }
+  proj4.defs(EPSG, "+proj=stere +lat_0=-90 +lat_ts=-90 +lon_0=0 +k=0.994 +x_0=2000000 +y_0=2000000 +ellps=WGS84 +datum=WGS84 +units=m +no_defs");
 
-     var layer = new ol.layer.Tile({
-       source: new ol.source.WMTS({
-         attributions: 'Tiles ©',
-         url: 'https://services.arcgisonline.com/arcgis/rest/' +
-             'services/Demographics/USA_Population_Density/MapServer/WMTS/',
-         layer: '0',
-         matrixSet: 'EPSG:3857',
-         format: 'image/png',
-         projection: projection,
-         tileGrid: new ol.tilegrid.WMTS({
-           origin: ol.extent.getTopLeft(projectionExtent),
-           resolutions: resolutions,
-           matrixIds: matrixIds
-         }),
-         style: 'default'
-       })
-     });
+       var projection = ol.proj.get(EPSG);
+       console.log(projection);
 
-     console.log("layer", layer);
+       //var projectionExtent = [-2623287.1531823575, -2623287.1531823575,  6623287.153182365, 6623287.153182365];
+       var origin = [ -28567900,  32567900];
+    //   var resolutions = new Array(9);
+    //   var matrixIds = new Array(9);
+       var resolutions = [21674.7100160867, 10837.35500804335, 5418.677504021675, 2709.3387520108377, 1354.6693760054188, 677.3346880027094,338.6673440013547,169.33367200067735,84.66683600033868,42.33341800016934];
+        var matrixIds = [0,1,2,3,4,5,6,7,8,9]
+    //   for (var z = 0; z < 9; ++z) {
+         // generate resolutions and matrixIds arrays for this WMTS
+    //     resolutions[z] = size / Math.pow(2, z);
+    //     matrixIds[z] = z;
+    //  }
 
-    var map = new ol.Map({
-       layers:[layer],
-       target: 'map',
-       controls: ol.control.defaults({
-         attributionOptions: {
-           collapsible: false
-         }
-       }),
-       view: new ol.View({
-         center: [-11158582, 4813697],
-         zoom: 4
-       })
-     });
+  console.log(resolutions);
+
+  var url = "http://geodata.npolar.no/arcgis/rest/services/Basisdata_Intern/NP_Antarktis_WMTS_3031/MapServer/WMTS/tile/1.0.0";
+
+  var layer = new ol.layer.Tile({
+    source: new ol.source.WMTS({
+      attributions: 'Tiles ©',
+      url: url,
+      layer: 'Basisdata_Intern_NP_Antarktis_WMTS_3031',
+      matrixSet: 'default028mm',
+      format: 'image/png',
+      projection: projection,
+      tileGrid: new ol.tilegrid.WMTS({
+        origin: origin,
+        resolutions: resolutions,
+        matrixIds: matrixIds
+      }),
+      style: 'default'
+    })
+  });
+
+  console.log("2");
+
+  var map = new ol.Map({
+  layers:[layer],
+  target: 'map',
+  controls: ol.control.defaults({
+    attributionOptions: {
+      collapsible: false
+    }
+  }),
+        view: new ol.View({
+          center: ol.proj.transform([2.5333, -89.9999], 'EPSG:4326', EPSG),
+          zoom: 4
+        })
+      });
 
 });
