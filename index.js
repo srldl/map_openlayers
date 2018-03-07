@@ -12,31 +12,22 @@ map_openlayers.controller('MapCtrl', function($scope) {
   proj4.defs(EPSG, "+proj=stere +lat_0=-90 +lat_ts=-90 +lon_0=0 +k=0.994 +x_0=2000000 +y_0=2000000 +ellps=WGS84 +datum=WGS84 +units=m +no_defs");
 
        var projection = ol.proj.get(EPSG);
-       console.log(projection);
 
-      // var projectionExtent = [2000000.0000, -1405880.7174, 2000000.0000, 2000000.0000];
+
        var origin = [-28567900,32567900];
-    //   var resolutions = new Array(9);
-    //   var matrixIds = new Array(9);
        var resolutions = [21674.7100160867,10837.35500804335,5418.677504021675,2709.3387520108377,1354.6693760054188,677.3346880027094,338.6673440013547,169.33367200067735,84.66683600033868,42.33341800016934];
-        var matrixIds = [0,1,2,3,4,5,6,7,8,9]
-    //   for (var z = 0; z < 9; ++z) {
-         // generate resolutions and matrixIds arrays for this WMTS
-    //     resolutions[z] = size / Math.pow(2, z);
-    //     matrixIds[z] = z;
-    //  }
+       var matrixIds = [0,1,2,3,4,5,6,7,8,9]
 
-  console.log(resolutions);
 
   var url = "http://vilhelm.npolar.no/arcgis/rest/services/Basisdata_Intern/NP_Antarktis_WMTS_3031/MapServer/WMTS";
 
   var layer = new ol.layer.Tile({
     source: new ol.source.WMTS({
-      attributions: 'Tiles ©',
+      attributions: '© Norwegian Polar Institute',
       url: url,
       layer: 'Basisdata_Intern_NP_Antarktis_WMTS_3031',
       matrixSet: 'default028mm',
-      format: 'image%2Fjpg',
+      format: 'image/jpgpng',
       projection: projection,
       tileGrid: new ol.tilegrid.WMTS({
         origin: origin,
@@ -46,6 +37,7 @@ map_openlayers.controller('MapCtrl', function($scope) {
       style: 'default'
     })
   });
+
 
   var map = new ol.Map({
   layers:[layer],
@@ -61,5 +53,23 @@ map_openlayers.controller('MapCtrl', function($scope) {
           zoom: 4
         })
       });
+
+      //Full Screen
+      var myFullScreenControl = new ol.control.FullScreen();
+      map.addControl(myFullScreenControl);
+
+      let marker = map.addOverlay(new ol.Overlay({
+           position: ol.proj.transform([2.5333,-72.01667], 'EPSG:4326', EPSG),
+           positioning: 'center-center',
+           element: document.getElementById('marker')
+        //   element: $('<img src="//openlayers.org/en/v4.6.4/examples/data/dot.png">')
+       }));
+
+       // Popup showing the position the user clicked
+       var popup = new ol.Overlay({
+           element: document.getElementById('popup')
+       });
+       map.addOverlay(popup);
+
 
 });
